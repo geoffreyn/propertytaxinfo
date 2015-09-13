@@ -1,0 +1,1 @@
+web: gunicorn taxinfo:app --log-file=-
