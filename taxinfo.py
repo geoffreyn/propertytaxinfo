@@ -3,6 +3,86 @@ from requests import Session
 
 app = Flask(__name__)
 
+@app.route("/sdat/<path:identifier>")
+@app.route("/sdat")
+def property_sdat_render(identifier):
+
+    idpath = str(identifier).split('/')
+    
+    if len(idpath) <= 0 or len(idpath) > 2:
+        error = ('Invalid identifiers specified: %s, length %i not correct.  \nProper usage: sdat/homeAddress (spaces alowed (NOT IMPLEMENTED!)) or sdat/block/lot are the only acceptable formats.') % (','.join(idpath),len(idpath))
+        return error
+    elif len(idpath) == 1:
+        homeAddress = idpath[0]
+        block = ''
+        lot = ''
+    else:
+        block = idpath[0]
+        lot = idpath[1]
+        homeAddress = ''
+        
+    # Format boilerplate request
+    formdict = {'ctl00$ctl00$ctl00$ToolkitScriptManager1':'ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$updatePanel1|ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$wzrdRealPropertySearch$StepNavigationTemplateContainerID$btnStepNextButton',
+        'ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$hideBanner':'false',
+        '__EVENTTARGET':'',
+        '__EVENTARGUMENT':'',
+        '__LASTFOCUS':'',
+        '__VIEWSTATE':'/wEPDwUKLTI3NzgyMTg5Mw9kFgJmD2QWAmYPZBYCZg9kFgQCAQ9kFggCCQ8VAz0vUmVhbFByb3BlcnR5L2Vnb3YvZnJhbWV3b3Jrcy9ib290c3RyYXAvY3NzL2Jvb3RzdHJhcC5taW4uY3NzKC9SZWFsUHJvcGVydHkvZWdvdi9jc3MvYWdlbmN5LXN0eWxlcy5jc3M1L1JlYWxQcm9wZXJ0eS9lZ292L2Nzcy9tZGdvdl9yZXNwb25zaXZlVGFibGVzLm1pbi5jc3NkAgoPZBYCZg8VASgvUmVhbFByb3BlcnR5L2Vnb3YvY3NzL2FnZW5jeS1oZWFkZXIuY3NzZAILDxUKIS9SZWFsUHJvcGVydHkvZWdvdi9jc3MvaWUvaWU4LmNzcyEvUmVhbFByb3BlcnR5L2Vnb3YvY3NzL2llL2llNy5jc3MiL1JlYWxQcm9wZXJ0eS9lZ292L2pzL2h0bWw1c2hpdi5qcxsvUmVhbFByb3BlcnR5L2Nzcy9wcmludC5jc3MfL1JlYWxQcm9wZXJ0eS9zY3JpcHRzL2dsb2JhbC5qcykvUmVhbFByb3BlcnR5L2Vnb3YvanMvanF1ZXJ5LTEuOC4yLm1pbi5qcykvUmVhbFByb3BlcnR5L3NjcmlwdHMvanF1ZXJ5LmN5Y2xlLmFsbC5qcygvUmVhbFByb3BlcnR5L3NjcmlwdHMvanF1ZXJ5LnZhbGlkYXRlLmpzGi9SZWFsUHJvcGVydHkvSlMvZ2xvYmFsLmpzIC9SZWFsUHJvcGVydHkvZWdvdi9qcy95dWktbWluLmpzZAIMD2QWAgIBD2QWAmYPFQIaL1JlYWxQcm9wZXJ0eS9DU1MvTWFpbi5jc3MgL1JlYWxQcm9wZXJ0eS9jc3MvVGFibGVTdHlsZS5jc3NkAgMPZBYKAgEPZBYCAgEPFgIeBGhyZWYFHGh0dHA6Ly93d3cuZGF0Lm1hcnlsYW5kLmdvdi8WAgIBDxYEHgNzcmMFGX4vZWdvdi9pbWcvU0RBVF9USVRMRS5wbmceA2FsdAU1TWFyeWxhbmQgU3RhdGUgRGVwYXJ0bWVudCBvZiBBc3Nlc3NtZW50cyBhbmQgVGF4YXRpb25kAgMPZBYCAgEPZBYEAgMPZBYCAgEPDxYCHgRUZXh0BQJ3M2RkAgUPZBYCAgEPZBYCZg9kFgJmD2QWBgIFD2QWBAIBDw8WAh8DZWRkAgMPEGRkFgBkAgcPPCsADwEOaBYCZg9kFgICAQ9kFgJmD2QWAmYPZBYKZg9kFgICAQ9kFgJmD2QWAgIBD2QWBAIDDxAPFgYeDURhdGFUZXh0RmllbGQFBXZhbHVlHg5EYXRhVmFsdWVGaWVsZAUDa2V5HgtfIURhdGFCb3VuZGdkEBUZDC1TZWxlY3Qgb25lLQ9BTExFR0FOWSBDT1VOVFkTQU5ORSBBUlVOREVMIENPVU5UWQ5CQUxUSU1PUkUgQ0lUWRBCQUxUSU1PUkUgQ09VTlRZDkNBTFZFUlQgQ09VTlRZD0NBUk9MSU5FIENPVU5UWQ5DQVJST0xMIENPVU5UWQxDRUNJTCBDT1VOVFkOQ0hBUkxFUyBDT1VOVFkRRE9SQ0hFU1RFUiBDT1VOVFkQRlJFREVSSUNLIENPVU5UWQ5HQVJSRVRUIENPVU5UWQ5IQVJGT1JEIENPVU5UWQ1IT1dBUkQgQ09VTlRZC0tFTlQgQ09VTlRZEU1PTlRHT01FUlkgQ09VTlRZFlBSSU5DRSBHRU9SR0UnUyBDT1VOVFkTUVVFRU4gQU5ORSdTIENPVU5UWRFTVC4gTUFSWSdTIENPVU5UWQ9TT01FUlNFVCBDT1VOVFkNVEFMQk9UIENPVU5UWRFXQVNISU5HVE9OIENPVU5UWQ9XSUNPTUlDTyBDT1VOVFkQV09SQ0VTVEVSIENPVU5UWRUZAi0xAjAxAjAyAjAzAjA0AjA1AjA2AjA3AjA4AjA5AjEwAjExAjEyAjEzAjE0AjE1AjE2AjE3AjE4AjE5AjIwAjIxAjIyAjIzAjI0FCsDGWdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2cWAQIDZAIJDxAPFgYfBAUFdmFsdWUfBQUDa2V5HwZnZBAVBQwtU2VsZWN0IG9uZS0OU1RSRUVUIEFERFJFU1MbUFJPUEVSVFkgQUNDT1VOVCBJREVOVElGSUVSCk1BUC9QQVJDRUwOUFJPUEVSVFkgU0FMRVMVBQItMQIwMQIwMgIwMwIwNBQrAwVnZ2dnZxYBAgNkAgEPZBYCAgEPZBYGAgEPDxYCHwMFJkVudGVyIE1hcCBSZWZlcmVuY2UgZm9yIEJBTFRJTU9SRSBDSVRZZGQCBw8WAh4HVmlzaWJsZWdkAg0PZBYSAgMPEGQPFg1m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dGwwMCRjdGwwMCRNYWluQ29udGVudCRNYWluQ29udGVudCRjcGhNYWluQ29udGVudEFyZWEkdWNTZWFyY2hUeXBlJHd6cmRSZWFsUHJvcGVydHlTZWFyY2gkdWNTZWFyY2hSZXN1bHQkZ3ZfU2VhcmNoQnlSUFNhbGUPZ2QFhAFjdGwwMCRjdGwwMCRjdGwwMCRNYWluQ29udGVudCRNYWluQ29udGVudCRjcGhNYWluQ29udGVudEFyZWEkdWNTZWFyY2hUeXBlJHd6cmRSZWFsUHJvcGVydHlTZWFyY2gkdWNHcm91bmRSZW50JGd2X0dSUmVnaXN0cmF0b25SZXN1bHQPZ2QFYGN0bDAwJGN0bDAwJGN0bDAwJE1haW5Db250ZW50JE1haW5Db250ZW50JGNwaE1haW5Db250ZW50QXJlYSR1Y1NlYXJjaFR5cGUkd3pyZFJlYWxQcm9wZXJ0eVNlYXJjaA8QZBQrAQICAWYCAWQFcGN0bDAwJGN0bDAwJGN0bDAwJE1haW5Db250ZW50JE1haW5Db250ZW50JGNwaE1haW5Db250ZW50QXJlYSR1Y1NlYXJjaFR5cGUkd3pyZFJlYWxQcm9wZXJ0eVNlYXJjaCRXaXphcmRNdWx0aVZpZXcPD2QCAWQFf2N0bDAwJGN0bDAwJGN0bDAwJE1haW5Db250ZW50JE1haW5Db250ZW50JGNwaE1haW5Db250ZW50QXJlYSR1Y1NlYXJjaFR5cGUkd3pyZFJlYWxQcm9wZXJ0eVNlYXJjaCR1Y1NlYXJjaFJlc3VsdCRndl9TZWFyY2hSZXN1bHQPZ2QiKe/maufK7R523/kR+li5nB83xw==',
+        '__VIEWSTATEGENERATOR':'67B65B95',
+        '__EVENTVALIDATION':'/wEdAAeLHO4UiazhjJoEWt6WhsuhTM7lR6wkAQA4/LrX3F8+kJFCX6GXNshSNYudQwBINupfx21Q/fwirSrEZb/6IfokQ2/ExUnKIexbtLnm+FwTUQqLyXAQIRgTGoe+xG2l1j+MyhVtrGKhaCDPE00ZGRUyHazg9c4YiKfaisSIpUPyWMst3r0=',
+        '__ASYNCPOST':'true',
+        'ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$wzrdRealPropertySearch$StepNavigationTemplateContainerID$btnStepNextButton':'Next',
+        }
+    
+    # Site requires only specific fields are filled, e.g., if block and lot are available, clear the Address field
+    if block != '' and lot != '':
+        formdict['ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$wzrdRealPropertySearch$ucEnterData$txtMap_Block'] = block
+        formdict['ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$wzrdRealPropertySearch$ucEnterData$txtMap_Lot'] = lot
+        
+    ## NOT FUNCTIONAL!
+    elif homeAddress != '':
+        formdict['ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$wzrdRealPropertySearch$ucEnterData$txtStreenNumber'] = homeAddress.split('%20')[0]
+        formdict['ctl00$ctl00$ctl00$MainContent$MainContent$cphMainContentArea$ucSearchType$wzrdRealPropertySearch$ucEnterData$txtStreetName'] = ' '.join(homeAddress.split('%20')[1:])
+        
+        
+    # format standard request header, suggesting we're accessing the page from a browser
+    header = {
+            'Host': 'sdat.dat.maryland.gov',
+            'Origin': 'http://sdat.dat.maryland.gov',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:40.0) Gecko/20100101 Firefox/40.0.2 Waterfox/40.0.2',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate',
+            'Cache-Control': 'no-cache',
+            'Content-Length': '7358',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'DNT': '1',
+            'Referer': 'http://sdat.dat.maryland.gov/RealProperty/Pages/default.aspx',
+            'Cookie': '_gat=1; ASP.NET_SessionId=ridcsennnwadebhb4gzigmkn; _ga=GA1.2.292490867.1442124144; _ga=GA1.1.292490867.1442124144',
+            'Connection': 'keep-alive',
+            'X-MicrosoftAjax': 'Delta=true',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+
+    session = Session()
+
+
+    # HEAD requests ask for *just* the headers, which is all you need to grab the
+    # session cookie
+    session.head('http://sdat.dat.maryland.gov/RealProperty/Pages')
+
+    response = session.post(
+        url='http://sdat.dat.maryland.gov/RealProperty/Pages/default.aspx',
+        data = formdict,
+        headers = header
+    )
+        
+    # Output rendered HTML page to file in current directory
+    #with open('propinfo.html','wb') as f:
+    #	f.write(response.text.encode('utf-8'))	
+            
+    return response.text.encode('utf-8')
+	
 @app.route("/tax/<path:identifier>")
 @app.route("/tax")
 def property_info_render(identifier):
