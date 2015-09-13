@@ -54,7 +54,6 @@ def property_sdat_render(identifier):
             'Accept-Language': 'en-US,en;q=0.8',
             'Accept-Encoding': 'gzip, deflate',
             'Cache-Control': 'no-cache',
-            'Content-Length': '7358',
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'DNT': '1',
             'Referer': 'http://sdat.dat.maryland.gov/RealProperty/Pages/default.aspx',
@@ -83,6 +82,7 @@ def property_sdat_render(identifier):
             
     return response.text.encode('utf-8')
 	
+    
 @app.route("/tax/<path:identifier>")
 @app.route("/tax")
 def property_info_render(identifier):
@@ -162,7 +162,7 @@ def property_info_render(identifier):
 			
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return "<html><head><h1>Tax info listings</h3></head><body><br><a href='/tax/'>tax/</a><br><a href='/sdat/'>sdat/</body></html>"
 
 if __name__ == "__main__":
     #app.debug = True
