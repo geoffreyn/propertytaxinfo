@@ -57,7 +57,7 @@ def property_sdat_render(identifier):
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'DNT': '1',
             'Referer': 'http://sdat.dat.maryland.gov/RealProperty/Pages/default.aspx',
-            'Cookie': '_gat=1; ASP.NET_SessionId=ridcsennnwadebhb4gzigmkn; _ga=GA1.2.292490867.1442124144; _ga=GA1.1.292490867.1442124144',
+            'Cookie': 'ASP.NET_SessionId=ridcsennnwadebhb4gzigmkn; _ga=GA1.2.292490867.1442124144; _ga=GA1.1.292490867.1442124144',
             'Connection': 'keep-alive',
             'X-MicrosoftAjax': 'Delta=true',
             'X-Requested-With': 'XMLHttpRequest'
