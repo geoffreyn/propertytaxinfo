@@ -162,7 +162,7 @@ def property_info_render(identifier):
 			
 @app.route("/")
 def hello():
-    return "<html><head><h1>Tax info listings</h3></head><body><br><a href='/tax/'>tax/</a><br><a href='/sdat/'>sdat/</body></html>"
+    return '<html><head><h1>Tax info listings</h3></head><body><a href="/tax/"><h2>tax/</h2></a><a href="/sdat/"><h2>sdat/</h2><a href="https://github.com/geoffreyn/propertytaxinfo.git"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png"></a></body></html>'
 
 if __name__ == "__main__":
     #app.debug = True
